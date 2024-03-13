@@ -347,7 +347,7 @@ void ExampleBase::Run()
     bool showTimeRecords = false;
     bool fullscreen = false;
     const LLGL::Extent2D initialResolution = swapChain->GetResolution();
-    LLGL::Window& window = LLGL::CastTo<LLGL::Window>(swapChain->GetSurface());
+    LLGL::Canvas& window = LLGL::CastTo<LLGL::Canvas>(swapChain->GetSurface());
 
     while (LLGL::Surface::ProcessEvents() && !window.HasQuit() && !input.KeyDown(LLGL::Key::Escape))
     {
@@ -407,7 +407,7 @@ void ExampleBase::DrawFrame()
     // Draw frame in respective example project
     OnDrawFrame();
 
-    #ifndef LLGL_MOBILE_PLATFORM
+    #ifdef LLGL_MOBILE_PLATFORM
     // Present the result on the screen - cannot be explicitly invoked on mobile platforms
     swapChain->Present();
     #endif
@@ -446,15 +446,21 @@ ExampleBase::ExampleBase(const LLGL::UTF8String& title, EGLInfo eglInfo)
     // else
     //     throw std::invalid_argument("'android_app' state was not specified");
     //--------------------------------------------------------------------------------
+
     androidApp_ = new android_app();
     androidApp_->window = eglInfo.nativeWindow;
     rendererDesc.androidApp = androidApp_;
+    androidApp_->contentRect.left = 0;
+    androidApp_->contentRect.top = 0;
+    androidApp_->contentRect.right = eglInfo.width;
+    androidApp_->contentRect.bottom = eglInfo.height;
 
 
     LLGL::OpenGL::RenderSystemNativeHandle nativeRendererHandle = {};
     nativeRendererHandle.context = eglInfo.context;
     rendererDesc.nativeHandle = &nativeRendererHandle;
     rendererDesc.nativeHandleSize = sizeof(nativeRendererHandle);
+
     #endif
 
     if (g_Config.debugger)
@@ -481,6 +487,10 @@ ExampleBase::ExampleBase(const LLGL::UTF8String& title, EGLInfo eglInfo)
         swapChainDesc.debugName     = "SwapChain";
         swapChainDesc.resolution    = ScaleResolutionForDisplay(g_Config.windowSize, LLGL::Display::GetPrimary());
         swapChainDesc.samples       = GetSampleCount();
+
+#ifdef LLGL_OS_ANDROID
+        swapChainDesc.fullscreen = true;
+#endif
     }
     swapChain = renderer->CreateSwapChain(swapChainDesc);
 
