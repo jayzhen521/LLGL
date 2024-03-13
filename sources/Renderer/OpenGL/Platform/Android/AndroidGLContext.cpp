@@ -236,8 +236,26 @@ void AndroidGLContext::LoadExternalContext(EGLContext context)
     if (eglQueryContext(display_, context, EGL_CONFIG_ID, &configID) == EGL_FALSE)
         LLGL_TRAP("eglQueryContext failed (%s)", EGLErrorToString());
 
-    LLGL_ASSERT(configID >= 0 && configID < numConfigs);
-    config_ = configs[configID];
+//    LLGL_ASSERT(configID >= 0 && configID < numConfigs);
+//    config_ = configs[configID];
+
+    bool found = false;
+    for (EGLint i = 0; i < numConfigs; ++i) {
+        EGLint id = 0;
+        if (eglGetConfigAttrib(display_, configs[i], EGL_CONFIG_ID, &id) == EGL_TRUE) {
+            if (id == configID) {
+                config_ = configs[i];
+                found = true;
+                break;
+            }
+        } else {
+            LLGL_TRAP("eglGetConfigAttrib failed (%s)", EGLErrorToString());
+        }
+    }
+
+    if (!found) {
+        LLGL_TRAP("Failed to find the matching configuration");
+    }
 
     /* Accept external EGL context */
     hasExternalContext_ = true;
