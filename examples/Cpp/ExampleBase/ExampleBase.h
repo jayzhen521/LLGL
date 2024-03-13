@@ -29,6 +29,17 @@
 #ifdef LLGL_OS_ANDROID
 #   include <android_native_app_glue.h>
 #   include <android/log.h>
+#   include <EGL/egl.h>
+
+struct EGLInfo
+{
+    EGLDisplay display;
+    EGLSurface surface;
+    EGLContext context;
+    ANativeWindow* nativeWindow;
+    int width;
+    int height;
+};
 #endif
 
 
@@ -188,7 +199,7 @@ protected:
 
 protected:
 
-    ExampleBase(const LLGL::UTF8String& title);
+    ExampleBase(const LLGL::UTF8String& title, EGLInfo eglInfo = {});
 
     // Callback to draw each frame
     virtual void OnDrawFrame() = 0;

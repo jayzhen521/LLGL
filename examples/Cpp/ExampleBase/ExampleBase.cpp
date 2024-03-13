@@ -17,6 +17,11 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb/stb_image_write.h>
 
+#ifdef LLGL_OS_ANDROID
+#include <LLGL/Platform/NativeHandle.h>
+#include <LLGL/Backend/OpenGL/NativeHandle.h>
+#endif
+
 
 /*
  * Global helper functions
@@ -427,7 +432,7 @@ static LLGL::Extent2D ScaleResolutionForDisplay(const LLGL::Extent2D& res, const
         return res;
 }
 
-ExampleBase::ExampleBase(const LLGL::UTF8String& title)
+ExampleBase::ExampleBase(const LLGL::UTF8String& title, EGLInfo eglInfo)
 {
     // Set report callback to standard output
     LLGL::Log::RegisterCallbackStd();
@@ -436,10 +441,20 @@ ExampleBase::ExampleBase(const LLGL::UTF8String& title)
     LLGL::RenderSystemDescriptor rendererDesc = g_Config.rendererModule;
 
     #if defined LLGL_OS_ANDROID
-    if (android_app* app = ExampleBase::androidApp_)
-        rendererDesc.androidApp = app;
-    else
-        throw std::invalid_argument("'android_app' state was not specified");
+    // if (android_app* app = ExampleBase::androidApp_)
+    //     rendererDesc.androidApp = app;
+    // else
+    //     throw std::invalid_argument("'android_app' state was not specified");
+    //--------------------------------------------------------------------------------
+    androidApp_ = new android_app();
+    androidApp_->window = eglInfo.nativeWindow;
+    rendererDesc.androidApp = androidApp_;
+
+
+    LLGL::OpenGL::RenderSystemNativeHandle nativeRendererHandle = {};
+    nativeRendererHandle.context = eglInfo.context;
+    rendererDesc.nativeHandle = &nativeRendererHandle;
+    rendererDesc.nativeHandleSize = sizeof(nativeRendererHandle);
     #endif
 
     if (g_Config.debugger)

@@ -1,7 +1,13 @@
 #!/bin/bash
 
 IFS="" # Include whitespaces when expanding arrays of strings
-SOURCE_DIR=$PWD
+if [[ "$(uname -s)" == CYGWIN* ]]; then
+    # In Cygwin environment, convert current directory (Cygwin format) to Windows path format
+    SOURCE_DIR=$(cygpath -w "$PWD")
+else
+    # In non-Cygwin environments (like Linux), directly use the current directory
+    SOURCE_DIR="$PWD"
+fi
 OUTPUT_DIR="build_android"
 SKIP_VALIDATION=0
 CLEAR_CACHE=0
@@ -140,6 +146,7 @@ BASE_OPTIONS=(
     -DLLGL_BUILD_STATIC_LIB=$STATIC_LIB
     -DGaussLib_INCLUDE_DIR:STRING="$GAUSSIAN_LIB_DIR"
     -S "$SOURCE_DIR"
+    -G "$GENERATOR"
 )
 
 build_with_android_abi()
@@ -158,10 +165,10 @@ build_with_android_abi()
     fi
 
     if [ $PROJECT_ONLY -eq 0 ]; then
-        cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE ${OPTIONS[@]}
+        cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE "${OPTIONS[@]}"
         cmake --build "$CURRENT_OUTPUT_DIR"
     else
-        cmake ${OPTIONS[@]} -G "$GENERATOR"
+        cmake "${OPTIONS[@]}"
     fi
 }
 
@@ -175,5 +182,5 @@ if [ $ANDROID_ABI = "all" ]; then
         build_with_android_abi $ABI "${OUTPUT_DIR}/${ABI}"
     done
 else
-    build_with_android_abi $ANDROID_ABI "$OUTPUT_DIR"
+    build_with_android_abi $ANDROID_ABI "${OUTPUT_DIR}/${ANDROID_ABI}"
 fi
