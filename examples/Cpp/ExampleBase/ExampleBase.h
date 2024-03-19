@@ -199,7 +199,11 @@ protected:
 
 protected:
 
+#ifdef LLGL_OS_ANDROID
     ExampleBase(const LLGL::UTF8String& title, EGLInfo eglInfo = {});
+#else
+    ExampleBase(const LLGL::UTF8String& title);
+#endif
 
     // Callback to draw each frame
     virtual void OnDrawFrame() = 0;

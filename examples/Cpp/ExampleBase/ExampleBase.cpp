@@ -432,7 +432,11 @@ static LLGL::Extent2D ScaleResolutionForDisplay(const LLGL::Extent2D& res, const
         return res;
 }
 
+#ifdef LLGL_OS_ANDROID
 ExampleBase::ExampleBase(const LLGL::UTF8String& title, EGLInfo eglInfo)
+#else
+ExampleBase::ExampleBase(const LLGL::UTF8String& title)
+#endif
 {
     // Set report callback to standard output
     LLGL::Log::RegisterCallbackStd();
