@@ -11,10 +11,8 @@
 #include <iostream>
 #include "FileUtils.h"
 
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb/stb_image_write.h>
 
 #ifdef LLGL_OS_ANDROID
@@ -296,15 +294,15 @@ void ExampleBase::CanvasEventHandler::OnResize(LLGL::Canvas& /*sender*/, const L
 
 static constexpr const char* GetDefaultRendererModule()
 {
-    #if defined LLGL_OS_WIN32
-    return "Direct3D11";
-    #elif defined LLGL_OS_IOS || defined LLGL_OS_MACOS
-    return "Metal";
-    #elif defined LLGL_OS_ANDROID
-    return "OpenGLES3";
-    #else
+#if defined LLGL_OS_WIN32
     return "OpenGL";
-    #endif
+#elif defined LLGL_OS_IOS || defined LLGL_OS_MACOS
+    return "Metal";
+#elif defined LLGL_OS_ANDROID
+    return "OpenGLES3";
+#else
+    return "Direct3D11";
+#endif
 }
 
 struct ExampleConfig
@@ -347,7 +345,11 @@ void ExampleBase::Run()
     bool showTimeRecords = false;
     bool fullscreen = false;
     const LLGL::Extent2D initialResolution = swapChain->GetResolution();
+#ifdef LLGL_OS_ANDROID
     LLGL::Canvas& window = LLGL::CastTo<LLGL::Canvas>(swapChain->GetSurface());
+#else
+    LLGL::Window& window = LLGL::CastTo<LLGL::Window>(swapChain->GetSurface());
+#endif
 
     while (LLGL::Surface::ProcessEvents() && !window.HasQuit() && !input.KeyDown(LLGL::Key::Escape))
     {
@@ -407,10 +409,10 @@ void ExampleBase::DrawFrame()
     // Draw frame in respective example project
     OnDrawFrame();
 
-    #ifdef LLGL_MOBILE_PLATFORM
+//#ifdef LLGL_MOBILE_PLATFORM
     // Present the result on the screen - cannot be explicitly invoked on mobile platforms
     swapChain->Present();
-    #endif
+//#endif
 }
 
 static LLGL::Extent2D ScaleResolution(const LLGL::Extent2D& res, float scale)
@@ -433,7 +435,7 @@ static LLGL::Extent2D ScaleResolutionForDisplay(const LLGL::Extent2D& res, const
 }
 
 #ifdef LLGL_OS_ANDROID
-ExampleBase::ExampleBase(const LLGL::UTF8String& title, EGLInfo eglInfo)
+ExampleBase::ExampleBase(const LLGL::UTF8String& title, CustomContextInfo eglInfo)
 #else
 ExampleBase::ExampleBase(const LLGL::UTF8String& title)
 #endif
@@ -452,7 +454,7 @@ ExampleBase::ExampleBase(const LLGL::UTF8String& title)
     //--------------------------------------------------------------------------------
 
     androidApp_ = new android_app();
-    androidApp_->window = eglInfo.nativeWindow;
+    androidApp_->window = static_cast<ANativeWindow*>(eglInfo.nativeWindow);
     rendererDesc.androidApp = androidApp_;
     androidApp_->contentRect.left = 0;
     androidApp_->contentRect.top = 0;
@@ -531,7 +533,7 @@ ExampleBase::ExampleBase(const LLGL::UTF8String& title)
         std::cout << std::endl;
     }
 
-    #ifdef LLGL_MOBILE_PLATFORM
+#ifdef LLGL_OS_ANDROID
 
     // Set canvas title
     auto& canvas = LLGL::CastTo<LLGL::Canvas>(swapChain->GetSurface());
@@ -541,7 +543,7 @@ ExampleBase::ExampleBase(const LLGL::UTF8String& title)
 
     canvas.AddEventListener(std::make_shared<CanvasEventHandler>(*this, swapChain, projection));
 
-    #else // LLGL_MOBILE_PLATFORM
+#else // LLGL_OS_ANDROID
 
     // Set window title
     auto& window = LLGL::CastTo<LLGL::Window>(swapChain->GetSurface());
@@ -560,7 +562,7 @@ ExampleBase::ExampleBase(const LLGL::UTF8String& title)
     // Show window
     window.Show();
 
-    #endif // /LLGL_MOBILE_PLATFORM
+#endif // /LLGL_OS_ANDROID
 
     // Listen for window/canvas events
     input.Listen(swapChain->GetSurface());

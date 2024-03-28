@@ -31,15 +31,16 @@
 #   include <android/log.h>
 #   include <EGL/egl.h>
 
-struct EGLInfo
+struct CustomContextInfo
 {
-    EGLDisplay display;
-    EGLSurface surface;
-    EGLContext context;
-    ANativeWindow* nativeWindow;
+    void* display;
+    void* surface;
+    void* context;
+    void* nativeWindow;
     int width;
     int height;
 };
+
 #endif
 
 
@@ -198,9 +199,8 @@ protected:
     Gs::Matrix4f                                projection;
 
 protected:
-
 #ifdef LLGL_OS_ANDROID
-    ExampleBase(const LLGL::UTF8String& title, EGLInfo eglInfo = {});
+    ExampleBase(const LLGL::UTF8String& title, CustomContextInfo eglInfo = {});
 #else
     ExampleBase(const LLGL::UTF8String& title);
 #endif
