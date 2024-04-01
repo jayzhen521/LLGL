@@ -609,20 +609,20 @@ static void GLTexImage2D(const TextureDescriptor& desc, const ImageView* imageVi
             );
         }
     }
-    else if (CanInitializeTexWithRGBAf(desc))
-    {
-        /* Initialize texture image with default color */
-        auto image = GenImageDataRGBAf(desc.extent.width * desc.extent.height, desc.clearValue.color);
-        GLTexImage2D(
-            NumMipLevels(desc),
-            desc.format,
-            desc.extent.width,
-            desc.extent.height,
-            GL_RGBA,
-            GL_FLOAT,
-            image.data()
-        );
-    }
+    //else if (CanInitializeTexWithRGBAf(desc))
+    //{
+    //    /* Initialize texture image with default color */
+    //    auto image = GenImageDataRGBAf(desc.extent.width * desc.extent.height, desc.clearValue.color);
+    //    GLTexImage2D(
+    //        NumMipLevels(desc),
+    //        desc.format,
+    //        desc.extent.width,
+    //        desc.extent.height,
+    //        GL_RGBA,
+    //        GL_FLOAT,
+    //        image.data()
+    //    );
+    //}
     else
     {
         /* Allocate texture without initial data */
