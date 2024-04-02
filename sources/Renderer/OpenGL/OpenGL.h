@@ -69,9 +69,9 @@
 #   define LLGL_GLEXT_GET_TEX_LEVEL_PARAMETER
 #endif
 
-#if defined GL_ARB_clip_control
-#   define LLGL_GLEXT_CLIP_CONTROL
-#endif
+//#if defined GL_ARB_clip_control
+//#   define LLGL_GLEXT_CLIP_CONTROL
+//#endif
 
 #ifdef GL_TEXTURE_BORDER_COLOR
 #   define LLGL_SAMPLER_BORDER_COLOR
